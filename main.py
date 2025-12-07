@@ -32,6 +32,12 @@ class DefaultHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html")
 
+class AHandler(tornado.web.RequestHandler):
+    def initialize(self, manager):
+        self.manager = manager
+    def get(self):
+        self.write(dict(response="hi anna"))
+
 class LiveSocket(tornado.websocket.WebSocketHandler):
     clients = set()
     def initialize(self, manager):
@@ -60,6 +66,7 @@ class Application(tornado.web.Application):
             (r"/ws", LiveSocket, dict(manager=manager)),
             (r'/favicon.ico', tornado.web.StaticFileHandler),
             (r'/static/', tornado.web.StaticFileHandler),
+            (r"/a", AHandler, dict(manager=manager)),
             (r"/.*", DefaultHandler, dict(manager=manager)),
 
         ]

@@ -23,20 +23,36 @@ class Store(object):
     def save(self, entry):
         pass
 
-    def insert(self, sensor_value, now=None):
-        pass
+    def set(self, key, value):
+        self._store[key] = value
+    def get(self, key):
+        return self._store.get(key)
 
 class DefaultHandler(tornado.web.RequestHandler):
     def initialize(self, manager):
         self.manager = manager
     def get(self):
         self.render("index.html")
+    def post(self):
+        data = json.loads(self.request.body)
+        self.manager.set("temperature", data.get("temperature"))
+        self.write(dict(result="ok"))
+
 
 class AHandler(tornado.web.RequestHandler):
     def initialize(self, manager):
         self.manager = manager
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+    def options(self, *args):
+        # no body
+        # `*args` is for route with `path arguments` supports
+        self.set_status(204)
+        self.finish()
     def get(self):
-        self.write(dict(response="hi anna"))
+        self.write(dict(response=self.manager.get("temperature")))
 
 class LiveSocket(tornado.websocket.WebSocketHandler):
     clients = set()
@@ -79,12 +95,16 @@ class Application(tornado.web.Application):
         )
         super(Application, self).__init__(handlers, **settings)
 
+
 async def main():
     manager = Store("filename")
     app = Application(manager)
-    app.listen(80)
-    shutdown_event = asyncio.Event()
-    await shutdown_event.wait()
+    http_server = tornado.httpserver.HTTPServer(app, ssl_options={
+        "certfile": "/home/pol/ws/beacon/keys/node.polychronis.gr.pem",
+        "keyfile": "/home/pol/ws/beacon/keys/node.polychronis.gr-key.pem",
+    })
+    http_server.listen(443)
+    await asyncio.Event().wait()
 
 if __name__ == "__main__":
     try:

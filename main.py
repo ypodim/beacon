@@ -54,7 +54,7 @@ class AHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(dict(response=self.manager.get("temperature")))
     def post(self):
-        self.write(dict(result="Ok")
+        self.write(dict(result="Ok"))
 
 class LiveSocket(tornado.websocket.WebSocketHandler):
     clients = set()

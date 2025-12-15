@@ -39,6 +39,20 @@ class DefaultHandler(tornado.web.RequestHandler):
         self.write(dict(result="ok"))
 
 
+def process(token, text):
+    result = ""
+    i = 0
+    while i < len(text)-len(token)+1:
+        test = text[i:i+len(token)]
+        if token == test:
+            # print("found it at", i)
+            i += len(token)
+            result += f"<div class='under'>{token}</div>"
+        else:
+            result += text[i]
+            i += 1
+    return result
+
 class AHandler(tornado.web.RequestHandler):
     def initialize(self, manager):
         self.manager = manager
@@ -54,7 +68,11 @@ class AHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(dict(response=self.manager.get("temperature")))
     def post(self):
-        self.write(dict(result="Ok"))
+        text = self.get_arguments("text")
+        token = self.get_arguments("token")
+        if text: text = text[0]
+        if token: token = token[0]
+        self.write(dict(result=process(token, text)))
 
 class LiveSocket(tornado.websocket.WebSocketHandler):
     clients = set()

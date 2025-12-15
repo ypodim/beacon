@@ -72,7 +72,9 @@ class AHandler(tornado.web.RequestHandler):
         token = self.get_arguments("token")
         if text: text = text[0]
         if token: token = token[0]
-        self.write(dict(result=process(token, text)))
+        result = process(token, text)
+        # print(token, result)
+        self.write(dict(result=result))
 
 class LiveSocket(tornado.websocket.WebSocketHandler):
     clients = set()

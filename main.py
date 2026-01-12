@@ -125,7 +125,7 @@ async def main():
         "certfile": "/home/pol/ws/beacon/keys/node.polychronis.gr.pem",
         "keyfile": "/home/pol/ws/beacon/keys/node.polychronis.gr-key.pem",
     })
-    http_server.listen(443)
+    http_server.listen(8000)
     await asyncio.Event().wait()
 
 if __name__ == "__main__":
